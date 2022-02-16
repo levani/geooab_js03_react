@@ -4,7 +4,6 @@
 
 .App-logo {
   height: 40vmin;
-  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -35,4 +34,8 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.completed {
+  text-decoration: line-through;
 }
