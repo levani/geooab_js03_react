@@ -1,5 +1,9 @@
 import classNames from "classnames";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import Auth from "./Auth";
+import Input from "./components/Input";
+import SelectTheme from "./components/SelectTheme";
+import UserContext from "./context/UserContext";
 
 const ITEMS = [
   {
@@ -28,9 +32,12 @@ function TodoApp() {
   const [todos, setTodos] = useState(ITEMS);
   const [value, setValue] = useState('');
   const inputRef = useRef();
+  const userContext = useContext(UserContext);
 
   useEffect(() => {
-    inputRef.current.focus();
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   }, []);
 
   useEffect(() => {
@@ -65,11 +72,27 @@ function TodoApp() {
     setValue('');
   }
 
+  function onItemDelete(itemId) {
+    const newItems = todos.filter(item => item.id !== itemId);
+    setTodos(newItems);
+    localStorage.setItem('items', JSON.stringify(newItems));
+  }
+
+  const totalItem = todos.length;
+  const itemsCompleted = todos.filter(item => item.completed).length;
+  const itemsNotCompleted = todos.filter(item => !item.completed).length;
+
+  console.log(userContext.user);
+  
+  if (!userContext.user) {
+    return <Auth />
+  }
+
   return <div>
 
     <div style={{padding: '20px'}}>
       <form action="" onSubmit={onAddNewItem}>
-        <input
+        <Input
           type="text"
           value={value}
           onChange={e => setValue(e.target.value)}
@@ -88,11 +111,15 @@ function TodoApp() {
               onChange={() => onItemChange(item)}
             />
             {item.title}
-            <button>Delete</button>
+            <button onClick={() => onItemDelete(item.id)}>Delete</button>
           </li>
         ))
       }
     </ul>
+
+    სულ: {totalItem}, დასრულებული: {itemsCompleted}, დაუსრულებელი: {itemsNotCompleted}
+
+    <SelectTheme />
   </div>
 }
 

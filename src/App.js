@@ -1,22 +1,19 @@
-import logo from './logo.svg';
+import { useState } from 'react';
 import './App.css';
-import Button from './Button';
-import { useEffect, useState } from 'react';
-import Counter from './Counter';
+import ThemeContext from './todoapp/context/ThemeContext';
+import UserContext from './todoapp/context/UserContext';
 import TodoApp from './todoapp/TodoApp';
 
 function App() {
-  const [showCount, setShowCount] = useState(true);
+  const [theme, setTheme] = useState('dark');
+  const [user, setUser] = useState(null);
 
   return (
-    <TodoApp />
-
-    // <div>
-    //   {
-    //     showCount && <Counter />
-    //   }
-    //   <button onClick={() => setShowCount(false)}>hide counter</button>
-    // </div>
+    <ThemeContext.Provider value={{theme, setTheme}}>
+      <UserContext.Provider value={{user, setUser}}>
+        <TodoApp />
+      </UserContext.Provider>
+    </ThemeContext.Provider>
   );
 }
 
