@@ -4,46 +4,26 @@ import Auth from "./Auth";
 import Input from "./components/Input";
 import SelectTheme from "./components/SelectTheme";
 import UserContext from "./context/UserContext";
-
-const ITEMS = [
-  {
-    id: 1,
-    title: 'lorem ipsum 11',
-    completed: false,
-  },
-  {
-    id: 2,
-    title: 'lorem ipsum 22',
-    completed: false,
-  },
-  {
-    id: 3,
-    title: 'lorem ipsum 33',
-    completed: true,
-  },
-  {
-    id: 4,
-    title: 'lorem ipsum 44',
-    completed: true,
-  },
-];
+import axios from 'axios';
+import apiRequest from "./apiRequest";
 
 function TodoApp() {
-  const [todos, setTodos] = useState(ITEMS);
+  const [todos, setTodos] = useState([]);
   const [value, setValue] = useState('');
   const inputRef = useRef();
   const userContext = useContext(UserContext);
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    apiRequest('GET', 'tasks')
+      .then(response => {
+        setTodos(response.data.data);
+      })
+      .catch(error => console.log(error))
   }, []);
 
   useEffect(() => {
-    const items = localStorage.getItem('items');
-    if (items) {
-      setTodos(JSON.parse(items));
+    if (inputRef.current) {
+      inputRef.current.focus();
     }
   }, []);
 
@@ -68,25 +48,27 @@ function TodoApp() {
       ...todos,
     ]
     setTodos(newItems);
-    localStorage.setItem('items', JSON.stringify(newItems));
     setValue('');
+
+    apiRequest('POST', 'tasks/create', {
+      text: value
+    })
+      .then(response => console.log(response))
+      .catch(error => console.log(error));
   }
 
   function onItemDelete(itemId) {
     const newItems = todos.filter(item => item.id !== itemId);
     setTodos(newItems);
-    localStorage.setItem('items', JSON.stringify(newItems));
   }
 
   const totalItem = todos.length;
   const itemsCompleted = todos.filter(item => item.completed).length;
   const itemsNotCompleted = todos.filter(item => !item.completed).length;
-
-  console.log(userContext.user);
   
-  if (!userContext.user) {
-    return <Auth />
-  }
+  // if (!userContext.user) {
+  //   return <Auth />
+  // }
 
   return <div>
 
@@ -110,7 +92,7 @@ function TodoApp() {
               checked={item.completed}
               onChange={() => onItemChange(item)}
             />
-            {item.title}
+            {item.text}
             <button onClick={() => onItemDelete(item.id)}>Delete</button>
           </li>
         ))
