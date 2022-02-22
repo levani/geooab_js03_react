@@ -1,31 +1,29 @@
 import classNames from "classnames";
 import { useContext, useEffect, useRef, useState } from "react";
-import Auth from "./Auth";
 import Input from "./components/Input";
 import SelectTheme from "./components/SelectTheme";
 import UserContext from "./context/UserContext";
-import axios from 'axios';
 import apiRequest from "./apiRequest";
+import useRequest from "./hooks/useRequest";
 
 function TodoApp() {
   const [todos, setTodos] = useState([]);
   const [value, setValue] = useState('');
   const inputRef = useRef();
-  const userContext = useContext(UserContext);
-
-  useEffect(() => {
-    apiRequest('GET', 'tasks')
-      .then(response => {
-        setTodos(response.data.data);
-      })
-      .catch(error => console.log(error))
-  }, []);
+  // const userContext = useContext(UserContext);
+  const [data, loading] = useRequest('GET', 'tasks');
 
   useEffect(() => {
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
+
+  useEffect(() => {
+    if (data) {
+      setTodos(data);
+    }
+  }, [data]);
 
   function onItemChange(clickedItem) {
     const newValue = todos.map(item => {
@@ -71,7 +69,6 @@ function TodoApp() {
   // }
 
   return <div>
-
     <div style={{padding: '20px'}}>
       <form action="" onSubmit={onAddNewItem}>
         <Input
@@ -83,21 +80,25 @@ function TodoApp() {
       </form>
     </div>
 
-    <ul>
-      {
-        todos.map(item => (
-          <li key={item.id} className={classNames({completed: item.completed})}>
-            <input
-              type="checkbox"
-              checked={item.completed}
-              onChange={() => onItemChange(item)}
-            />
-            {item.text}
-            <button onClick={() => onItemDelete(item.id)}>Delete</button>
-          </li>
-        ))
-      }
-    </ul>
+    {
+      loading ? <p>loading...</p> : (
+        <ul>
+          {
+            todos.map(item => (
+              <li key={item.id} className={classNames({completed: item.completed})}>
+                <input
+                  type="checkbox"
+                  checked={item.completed}
+                  onChange={() => onItemChange(item)}
+                />
+                {item.text}
+                <button onClick={() => onItemDelete(item.id)}>Delete</button>
+              </li>
+            ))
+          }
+        </ul>
+      )
+    }
 
     სულ: {totalItem}, დასრულებული: {itemsCompleted}, დაუსრულებელი: {itemsNotCompleted}
 

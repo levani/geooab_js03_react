@@ -17,7 +17,7 @@ function Input(props, ref) {
   }))
 
   return (
-    <div class={`input-${themeContext.theme}`}>
+    <div className={`input-${themeContext.theme}`}>
       <input
         {...props}
         ref={inputRef}
