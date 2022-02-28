@@ -1,17 +1,27 @@
 import classNames from "classnames";
 import { useContext, useEffect, useRef, useState } from "react";
-import Input from "./components/Input";
+import Input from "./components/Input/Input";
 import SelectTheme from "./components/SelectTheme";
 import UserContext from "./context/UserContext";
 import apiRequest from "./apiRequest";
 import useRequest from "./hooks/useRequest";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 
 function TodoApp() {
   const [todos, setTodos] = useState([]);
   const [value, setValue] = useState('');
   const inputRef = useRef();
   // const userContext = useContext(UserContext);
-  const [data, loading] = useRequest('GET', 'tasks');
+  // const [data, loading] = useRequest('GET', 'tasks');
+  const { data, isLoading, refetch } = useQuery('tasks', () => apiRequest('GET', 'tasks'));
+  const addTodoMutation = useMutation((text) => {
+    return apiRequest('POST', 'tasks/create', {
+      text
+    })
+  });
+  const queryClient = useQueryClient();
+
+  console.log('data', data);
 
   useEffect(() => {
     if (inputRef.current) {
@@ -35,24 +45,21 @@ function TodoApp() {
     setTodos(newValue);
   }
 
-  function onAddNewItem(e) {
+  async function onAddNewItem(e) {
     e.preventDefault();
-    const newItems = [
-      { 
-        id: Date.now(),
-        title: value,
-        completed: false,
-      },
-      ...todos,
-    ]
-    setTodos(newItems);
+    // const newItems = [
+    //   { 
+    //     id: Date.now(),
+    //     text: value,
+    //     completed: false,
+    //   },
+    //   ...todos,
+    // ]
+    // setTodos(newItems);
     setValue('');
 
-    apiRequest('POST', 'tasks/create', {
-      text: value
-    })
-      .then(response => console.log(response))
-      .catch(error => console.log(error));
+    await addTodoMutation.mutateAsync(value);
+    queryClient.invalidateQueries('tasks');
   }
 
   function onItemDelete(itemId) {
@@ -81,7 +88,11 @@ function TodoApp() {
     </div>
 
     {
-      loading ? <p>loading...</p> : (
+      addTodoMutation.isLoading && <p>loading...</p>
+    }
+
+    {
+      isLoading ? <p>loading...</p> : (
         <ul>
           {
             todos.map(item => (
@@ -99,6 +110,8 @@ function TodoApp() {
         </ul>
       )
     }
+
+    <button onClick={() => refetch()}>refresh</button>
 
     სულ: {totalItem}, დასრულებული: {itemsCompleted}, დაუსრულებელი: {itemsNotCompleted}
 

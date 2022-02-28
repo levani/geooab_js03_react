@@ -8,7 +8,7 @@ export default function useRequest(method, endpoint, params) {
   useEffect(() => {
     apiRequest(method, endpoint, params)
       .then(response => {
-        setData(response.data.data);
+        setData(response);
       })
       .catch(error => {
         console.log(error)

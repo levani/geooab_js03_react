@@ -1,5 +1,6 @@
 import { forwardRef, useContext, useImperativeHandle, useRef } from "react"
-import ThemeContext from "../context/ThemeContext";
+import ThemeContext from "../../context/ThemeContext";
+import styles from './Input.module.scss';
 
 function Input(props, ref) {
   const inputRef = useRef();
@@ -17,11 +18,11 @@ function Input(props, ref) {
   }))
 
   return (
-    <div className={`input-${themeContext.theme}`}>
+    <div>
       <input
         {...props}
         ref={inputRef}
-        className="input"
+        className={styles.input}
       />
     </div>
   )
